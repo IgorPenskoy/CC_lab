@@ -3,11 +3,43 @@ EMPTY = '@'
 
 class Rule:
 
-    def __init__(self, p_string):
-        self.left, self.right = p_string.replace(' ', '').split('->')
+    def __init__(self, p_string=''):
+        if p_string:
+            self.left, right = p_string.replace(' ', '').split('->')
+            self.left = self.left.strip(' []')
+            self.right = list()
+            new_symbol = ''
+            flag = False
+            for symbol in right:
+                if symbol == '^' or symbol == '[':
+                    flag = True
+                if flag:
+                    new_symbol += symbol
+                    if new_symbol[0] == '^' or symbol == ']':
+                        flag = False
+                        new_symbol = new_symbol.strip(' []')
+                        self.right.append(new_symbol)
+                else:
+                    self.right.append(symbol)
+        else:
+            self.left = ''
+            self.right = list()
 
     def __str__(self):
-        return self.left + ' -> ' + self.right
+        if isinstance(self.left, list):
+            left = '[' + ''.join(self.left) + ']'
+        else:
+            left = self.left
+        right = ''
+        for r in self.right:
+            if len(r) > 1:
+                right += '[' + r + ']'
+            else:
+                right += r
+        return left + ' -> ' + right
+
+    def is_empty(self):
+        return [EMPTY] == self.right
 
 
 class Grammar:
@@ -32,7 +64,7 @@ class Grammar:
 
         n_count = int(read_line_strip(f))
         for i in range(n_count):
-            self.n.append(read_line_strip(f))
+            self.n.append(read_line_strip(f).strip(' []'))
 
         t_count = int(read_line_strip(f))
         for i in range(t_count):
@@ -42,7 +74,7 @@ class Grammar:
         for i in range(p_count):
             self.p.append(Rule(read_line_strip(f)))
 
-        self.s = read_line_strip(f)
+        self.s = read_line_strip(f).strip('[]')
 
         f.close()
 
@@ -51,18 +83,24 @@ class Grammar:
 
         f.write('Нетерминалы\n')
         for n in self.n:
-            f.write(n + '; ')
+            if isinstance(n, list):
+                f.write('[' + ''.join(n) + ']\n')
+            else:
+                f.write(str(self.s) + '\n')
 
         f.write('\nТерминалы\n')
         for t in self.t:
-            f.write(t + '; ')
+            f.write(t + '\n')
 
         f.write('\nПравила\n')
         for p in self.p:
-            f.write(str(p) + '; ')
+            f.write(str(p) + '\n')
 
         f.write('\nНачальный символ грамматики\n')
-        f.write(self.s)
+        if isinstance(self.s, list):
+            f.write('[' + ''.join(self.s[0]) + ']')
+        else:
+            f.write(str(self.s))
 
         f.close()
 

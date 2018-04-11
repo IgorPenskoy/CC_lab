@@ -5,9 +5,10 @@ B
 2
 a
 b
-4
-S -> a
-S -> A
-A -> AB
-B -> b
+5
+S -> AB
+A -> aA
+A -> @
+B -> bA
+B -> @
 S
